@@ -12,7 +12,11 @@ type CardProps = {
   platform: keyof typeof Platform;
 };
 
-const PlatformIcons = ({ platform }: { platform: keyof typeof Platform }) => {
+export const PlatformIcons = ({
+  platform,
+}: {
+  platform: keyof typeof Platform;
+}) => {
   switch (platform) {
     case "instagram":
       return (
