@@ -15,14 +15,14 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import PlatformCard, {
   Platform,
@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import parse from "html-react-parser";
 import { Check, ChevronsUpDown } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect } from "react";
@@ -73,7 +74,9 @@ export default function Home() {
   const [loading, setLoading] = React.useState(false);
 
   const [inputText, setInputText] = React.useState("");
-  const [output, setOutput] = React.useState<string[]>([]);
+  const [output, setOutput] = React.useState<
+    { type: string; message: string }[]
+  >([{ type: "request", message: "Generate Insights" }]);
   const [chatLoading, setChatLoading] = React.useState(false);
 
   const [metrics, setMetrics] = React.useState<{ [key: string]: unknown }>();
@@ -91,36 +94,47 @@ export default function Home() {
     fetch(`/api/engagement/metrics?type=${value}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log(data["facebook"]);
         setMetrics(data.data);
         setChartData(data.monthlyData);
         setTopViewed(data.topViewed);
-        console.log(data);
       })
       .finally(() => setLoading(false));
   }, [value]);
 
   const handleChatSendButton = () => {
-    console.log("called");
+    if (inputText === "") return;
+    setOutput([...output, { type: "request", message: inputText }]);
+
     setChatLoading(true);
-    fetch(`/api/chat?inputText=${`"${inputText ?? "Generate Insights"}"`}`)
+    fetch(`/api/chat?inputText=${`"${inputText}"`}`)
       .then((res) => res.json())
-      .then((data) =>
-        setOutput([...output, data.outputs[0].outputs[0].results.message.text])
-      )
+      .then((data) => {
+        const text = data.outputs[0].outputs[0].results.message.text;
+        setOutput([
+          ...output,
+          { type: "request", message: inputText },
+          { type: "response", message: text.replaceAll("\n", "<br>") },
+        ]);
+      })
       .finally(() => setChatLoading(false));
+
+    setInputText("");
   };
 
-  useEffect(() => {
+  const handleDialogOpenButton = () => {
+    if (output.length > 1) return;
     setChatLoading(true);
     fetch(`/api/chat?inputText="Generate Insights"`)
       .then((res) => res.json())
-      .then((data) =>
-        setOutput([data.outputs[0].outputs[0].results.message.text])
-      )
+      .then((data) => {
+        const text = data.outputs[0].outputs[0].results.message.text;
+        setOutput([
+          ...output,
+          { type: "response", message: text.replaceAll("\n", "<br>") },
+        ]);
+      })
       .finally(() => setChatLoading(false));
-    console.log(output);
-  }, [output]);
+  };
 
   return (
     <div className="2xl:max-w-screen-xl xl:max-w-screen-xl md:max-w-screen-md sm:max-w-screen-sm max-w-full mx-auto px-8">
@@ -144,10 +158,11 @@ export default function Home() {
           </div>
         </div>
         <div className="flex gap-2 font-metropolis-semibold">
-          <Dialog>
-            <DialogTrigger asChild>
+          <Drawer>
+            <DrawerTrigger asChild>
               <Button
                 variant={"outline"}
+                onClick={handleDialogOpenButton}
                 className="bg-gradient-to-r from-[#c084fc] to-[#fb7185] text-white rounded-lg"
               >
                 <svg
@@ -164,46 +179,55 @@ export default function Home() {
                 </svg>
                 Generate Insights
               </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Post Analysis Assistant</DialogTitle>
-                <DialogDescription>
+            </DrawerTrigger>
+            <DrawerContent className="min-w-xl w-[29%]">
+              <DrawerHeader className="font-metropolis-semibold">
+                <DrawerTitle>Post Analysis Assistant</DrawerTitle>
+                <DrawerDescription>
                   AI assistant to help you with your social media analytics
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex items-center space-x-2">
-                {!chatLoading ? (
-                  <div className="">
-                    {output.map((message, index) => (
-                      <div key={index} className="bg-slate-100 p-2 rounded-lg">
-                        {message}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div role="status">
-                    <svg
-                      aria-hidden="true"
-                      className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
-                      viewBox="0 0 100 101"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                        fill="currentColor"
-                      />
-                      <path
-                        d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                        fill="currentFill"
-                      />
-                    </svg>
-                    <span className="sr-only">Running flow...</span>
-                  </div>
-                )}
+                </DrawerDescription>
+                <hr />
+              </DrawerHeader>
+              <div className="flex items-center space-x-2 overflow-scroll px-4">
+                <div className="flex flex-col gap-3 font-metropolis-medium text-sm items-end w-full">
+                  {output.map(({ type, message }, index) => {
+                    if (type === "request") {
+                      return (
+                        <div key={index} className="w-fit">
+                          <div className="bg-gradient-to-r from-[#c084fc] to-[#fb7185] text-white rounded-lg p-2 px-3">
+                            {parse(message)}
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      console.log(message);
+                      return (
+                        <div key={index} className="w-fit max-w-lg">
+                          <div className="bg-slate-100 p-2 rounded-lg border-slate-200 border">
+                            {parse(message)}
+                          </div>
+                        </div>
+                      );
+                    }
+                  })}
+                  {chatLoading ? (
+                    <div className="rounded-lg flex items-center gap-2">
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-fuchsia-300 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-fuchsia-400"></span>
+                      </span>
+                      <span className="font-metropolis-medium text-xs">
+                        {" "}
+                        Generating
+                      </span>
+                    </div>
+                  ) : (
+                    <></>
+                  )}
+                </div>
               </div>
-              <DialogFooter className="sm:justify-end w-full">
+              <DrawerFooter className="sm:justify-end w-full">
+                <hr />
                 <div className="flex w-full gap-2.5">
                   <Input
                     name="chatInput"
@@ -217,14 +241,14 @@ export default function Home() {
                     role="combobox"
                     aria-expanded={open}
                     onClick={handleChatSendButton}
-                    className="justify-between rounded-lg bg-[#6826ea] hover:bg-[#411c8d]"
+                    className="justify-between bg-gradient-to-r from-[#c084fc] to-[#fb7185] text-white rounded-lg"
                   >
                     Send
                   </Button>
                 </div>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
