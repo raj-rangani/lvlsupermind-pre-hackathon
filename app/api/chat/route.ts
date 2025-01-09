@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
       body: JSON.stringify({ input_value: inputText }),
     }
   ).then((res) => res.json());
+  console.log(process.env.LANGFLOW_TOKEN);
 
   return NextResponse.json(result, { status: 200 });
 }
