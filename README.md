@@ -1,13 +1,44 @@
-## Useful Links
+## Hosted Application
 
-- [Hosted URL](https://lvlsupermind-pre-hackathon.vercel.app/) - Access the live version of the app.
-- [Video Describing](https://www.loom.com/share/89627c3b16f7435fa9bdbcd036fb0ed7?sid=e09aee9d-a07f-4dee-8ce1-16a75a111038) - View our experience with the app.
+You can access the live version of this application via the following link:
+
+- [Hosted Application URL](https://lvlsupermind-pre-hackathon.vercel.app/)
+
+### How to Access:
+1. Click on the link above to open the application in your browser.
+2. Explore the features and functionalities live.
+
+---
+
+## Recorded Demo
+
+We have prepared a pre-recorded demo to help you understand the features and functionality of this project. You can watch the video on Loom:
+
+- [Watch the Recorded Demo on Loom](https://www.loom.com/share/89627c3b16f7435fa9bdbcd036fb0ed7?sid=03ccded0-65b2-4978-8c66-470d3e8a5957)
+
+### How to Access:
+1. Click on the link above to view the demo.
+2. The video will walk you through the key features and usage of the application.
+3. If you have any questions or feedback after watching the video, feel free to reach out or create an issue in the repository.
+
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 
-First, run the development server:
+First, install the dependencies:
+
+```bash
+npm install
+# or
+yarn add
+# or
+pnpm add
+# or
+bun add
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
