@@ -1,3 +1,8 @@
+## Useful Links
+
+- [Hosted URL](https://lvlsupermind-pre-hackathon.vercel.app/) - Access the live version of the app.
+- [Video Describing](https://www.loom.com/share/89627c3b16f7435fa9bdbcd036fb0ed7?sid=e09aee9d-a07f-4dee-8ce1-16a75a111038) - View our experience with the app.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
